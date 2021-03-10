@@ -7,5 +7,5 @@ module.exports = new Pool({
     password: "postgres1004",
     host: "localhost",
     port: "5432",
-    database: "launchstoredb"
+    database: "Launchstore"
 })
