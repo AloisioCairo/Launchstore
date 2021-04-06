@@ -22,6 +22,7 @@ module.exports = {
             const result = await db.query(`SELECT * FROM files WHERE id = $1`, [id])
             const file = result.rows[0]
 
+            // Remove a imagem/arquivo da pasta "public"
             fs.unlinkSync(file.path)
 
             return db.query(`DELETE FROM files WHERE id = $1`, [id])
