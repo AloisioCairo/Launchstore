@@ -24,6 +24,49 @@ CREATE TABLE "files" (
   "product_id" int
 );
 
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "name" text NOT NULL,
+  "email" text UNIQUE NOT NULL,
+  "password" text NOT NULL,
+  "cpf_cnpj" int UNIQUE NOT NULL,
+  "cep" text,
+  "addres" text,
+  "created_at" timestamp DEFAULT (now()),
+  "updated_at" timestamp DEFAULT (now())
+);
+
+
+/* - - FOREIGN KEY - - */
 ALTER TABLE "products" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
+ALTER TABLE "products" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
 ALTER TABLE "files" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
+
+
+
+/* - - FUNCTIONS - - */
+CREATE FUNCTION public.trigger_set_timestamp()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+	NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.trigger_set_timestamp()
+    OWNER TO postgres;
+
+
+/* - - CREATE TRIGGER - - */
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE 
+    ON public.products
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.trigger_set_timestamp();
+
