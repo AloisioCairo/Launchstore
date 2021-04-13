@@ -8,7 +8,10 @@ async function post(req, res, next) {
 
     for (key of keys) {
         if (req.body[key] == "") {
-            return res.send('Por favor. Preencha todos os campos.')
+            return res.render('user/register', {
+                user: req.body,
+                error: 'Por favor. Preencha todos os campos..'
+            })
         }
     }
 
@@ -23,11 +26,17 @@ async function post(req, res, next) {
     })
 
     if (user)
-        return res.send('Usuário já cadastrado')
+        return res.render('user/register', {
+            user: req.body, // Fase 4: Cadastrando Usuários > Mensagens de alerta > Mensagens de erros aos usuários  | Faz com que os campos mantem-se preenchidos
+            error: 'Usuário já cadastrado.'
+        })
 
     // check if password match
     if (password != passwordRepeat)
-        res.send('Password diferentes')
+        return res.render('user/register', {
+            user: req.body,
+            error: 'As senhas informadas estão diferentes.'
+        })
 
     next()
 }
