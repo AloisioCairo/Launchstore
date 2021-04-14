@@ -70,3 +70,17 @@ CREATE TRIGGER set_timestamp
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
 
+/* 
+  Tabela para armazenar as sessões dos usuários
+  Fase 4: Controle da Sessão do Usuário > Atualizando Usuários > Express session
+*/
+CREATE TABLE "session" (
+  "sid" varchar NOT NULL COLLATE "default",
+	"sess" json NOT NULL,
+	"expire" timestamp(6) NOT NULL
+)
+WITH (OIDS=FALSE);
+
+ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+
+CREATE INDEX "IDX_session_expire" ON "session" ("expire");

@@ -1,6 +1,7 @@
 const { create } = require('browser-sync')
 const db = require('../../config/db')
 const { hash } = require('bcryptjs') // Biblioteca para fazer o hash da senha
+const { update } = require('../controllers/UserController')
 
 module.exports = {
     // Fase 4: Cadastrando Usuários > Máscaras e Validações > Query dinâmica para buscar usuários
@@ -37,7 +38,7 @@ module.exports = {
                 passwordHash,
                 data.cpf_cnpj.replace(/\D/g, ""),
                 data.cep.replace(/\D/g, ""),
-                data.adres
+                data.addres
             ]
 
             const results = await db.query(query, values)
@@ -45,5 +46,25 @@ module.exports = {
         } catch (err) {
             console.error('Erro ao tentar cadastrar um novo usuário. Erro: ' + err)
         }
+    },
+    // Fase 4: Controle de sessão de usuários > Atualizando usuários > Lógica do model de update de usuário
+    async update(id, fields) {
+        let query = "UPDATE users SET"
+
+        Object.keys(fields).map((key, index, array) => {
+            if ((index + 1) < array.length) {
+                query = `${query}
+                    ${key} = '${fields[key]}',
+                `
+            } else {
+                query = `${query}
+                    ${key} = '${fields[key]}'
+                    WHERE id = ${id}
+                `
+            }
+        })
+
+        await db.query(query)
+        return
     }
 }
