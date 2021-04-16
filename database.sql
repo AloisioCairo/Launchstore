@@ -33,7 +33,9 @@ CREATE TABLE "users" (
   "cep" text,
   "addres" text,
   "created_at" timestamp DEFAULT (now()),
-  "updated_at" timestamp DEFAULT (now())
+  "updated_at" timestamp DEFAULT (now()),
+  "reset_toke" text,
+  "reset_toke_expires" text
 );
 
 

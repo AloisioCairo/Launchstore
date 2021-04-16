@@ -1,9 +1,11 @@
 /* Fase 4: Controle de sessão do usuário > Login logout > Estilizando o form de login do usuário */
-section.login.container {
+section.login.container,
+section.password.container {
     max-width: 500px;
 }
 
-section.login.container .fields {
+section.login.container .fields,
+section.password.container .fields {
     margin-bottom: 32px;
 }
 

@@ -13,8 +13,6 @@ function isLoggedRedirectToUsers(req, res, next) {
     if (req.session.userId)
         return res.redirect('/users')
 
-    console.log('ok')
-
     next()
 }
 
