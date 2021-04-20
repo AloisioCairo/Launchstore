@@ -86,3 +86,19 @@ WITH (OIDS=FALSE);
 ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
 
 CREATE INDEX "IDX_session_expire" ON "session" ("expire");
+
+-- Deletar os produtos automaticamente quando deletar um usuario 
+alter table "products"
+drop constraint products_user_id_key,
+add constraint products_user_id_key
+foreign key ("user_id")
+references  "users" ("id")
+on delete cascade
+
+-- Deletar os arquivos automaticamente quando deletar um produto
+alter table "files"
+drop constraint files_product_id_fkey,
+add constraint files_product_id_fkey
+foreign key ("product_id")
+references  "products" ("id")
+on delete cascade

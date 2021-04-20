@@ -47,11 +47,29 @@ module.exports = {
 
 
 
-        } catch (error) {
-            console.error('Erro ao atualizar o cadastro do usuário. Error: ' + error)
+        } catch (err) {
+            console.error('Erro ao atualizar o cadastro do usuário. Error: ' + err)
             return res.render("user/index", {
                 error: "Algum erro aconteceu ao tentar atualizar o cadastro do usuário."
             })
         }
+    },
+    // Fase 4: Controle de sessão do usuário > Lógica avançada de exclusão > SQL cascade
+    async delete(req, res) {
+        try {
+            await User.delete(req.body.id)
+            req.session.destroy() // Destroi a seção do usuário
+
+            return res.render("session/login", {
+                success: "Conta deletada com sucesso."
+            })
+        } catch (err) {
+            console.error('Houve um erro ao tentar deletar o cadastro do usuário. Erro: ' + err)
+            return res.render("user/index", {
+                user: req.body,
+                error: "Erro ao tentar deletar sua conta de usuário."
+            })
+        }
     }
+
 }

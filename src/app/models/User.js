@@ -1,7 +1,9 @@
 const { create } = require('browser-sync')
 const db = require('../../config/db')
 const { hash } = require('bcryptjs') // Biblioteca para fazer o hash da senha
-const { update } = require('../controllers/UserController')
+//const { update, delete } = require('../controllers/UserController')
+const Product = require('../models/Product')
+const fs = require('fs')
 
 module.exports = {
     // Fase 4: Cadastrando Usuários > Máscaras e Validações > Query dinâmica para buscar usuários
@@ -66,5 +68,30 @@ module.exports = {
 
         await db.query(query)
         return
+    },
+    // Fase 4: Controle de sessão do usuário > Lógica avançada de exclusão > SQL cascade
+    async delete(id) {
+        let results = await db.query('SELECT * FROM products WHERE user_id = $1', [id])
+        const products = results.rows
+
+        // Pegar todas as imagens do produto
+        const allFilesPromise = products.map(product =>
+            Product.files(product.id))
+
+        let promiseResults = await Promise.all(allFilesPromise)
+
+        // Remove o usuário
+        await db.query('DELETE FROM users WHERE id = $1', [id])
+
+        // Remove as imagens dos produtos que estão na pasta "public/images"
+        promiseResults.map(results => {
+            results.rows.map(file => {
+                try {
+                    fs.unlinkSync(file.path)
+                } catch (err) {
+                    console.error('Não localizado nenhuma imagem do produto para ser excluída. ' + err)
+                }
+            })
+        })
     }
 }

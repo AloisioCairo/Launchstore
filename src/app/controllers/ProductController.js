@@ -33,6 +33,7 @@ module.exports = {
         if (req.files.length == 0)
             return res.send('Por favor, informe ao menos uma imagem.')
 
+        req.body.user_id = req.session.userId // Fase 4: Controle de sessão do usuário > Lógica avançada de exclusão > Verificando bugs e removendo usuários
         let results = await Product.create(req.body)
         const productId = results.rows[0].id
 
