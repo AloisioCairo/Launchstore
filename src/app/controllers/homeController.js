@@ -15,8 +15,19 @@ module.exports = {
             let results = await Product.files(productId)
             const files = results.rows.map(file => `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`)
 
+            console.log('req.protocol_' + req.protocol)
+            console.log('req.headers.host_' + req.headers.host)
+            console.log('files_' + files[0])
+
             return files[0]
         }
+
+        /*// Busca as imagens do produto
+        results = await Product.files(products.id)
+        const files = results.rows.map(file => ({
+            ...file,
+            src: `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`
+        }))*/
 
         // Essa const retorna um array
         const productsPromise = products.map(async product => {

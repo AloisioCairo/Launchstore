@@ -8,9 +8,9 @@ module.exports = session({
         pool: db // Banco de dados
     }),
     secret: 'iabadabadu',
-    resave: false,
+    resave: false, // Se "True" sempre salva uma nova sessão quando a página for recarregada
     saveUninitialized: false,
     cookie: {
-        maxAge: 30 * 24 * 60 * 60 * 100
+        maxAge: 30 * 24 * 60 * 60 * 100 // Tempo que a sessão fica ativa no bando de dados
     }
 })
