@@ -1,6 +1,12 @@
 // Fase 4: Cadastrando Usuários > Registro de Usuários > Formulário de registro
+const { unlinkSync } = require('fs')
+const { hash } = require('bcryptjs')
+
 const User = require('../models/User')
+const Product = require('../models/Product')
+
 const { formatCpfCnpj, formatCep } = require('../../lib/utils')
+const { Console } = require('console')
 
 module.exports = {
     registerForm(req, res) {
@@ -8,20 +14,41 @@ module.exports = {
     },
     // Fase 4: Constrole de sessão do usuário > Atualizando usuários > Criando formulário de atualização de usuário
     async show(req, res) {
-        const { user } = req // Fase 4: Constrole de sessão do usuário > Atualizando usuários > Ajustando validação do usuário
+        try {
+            const { user } = req // Fase 4: Constrole de sessão do usuário > Atualizando usuários > Ajustando validação do usuário
 
-        user.cpf_cnpj = formatCpfCnpj(user.cpf_cnpj)
-        user.cep = formatCep(user.cep)
+            user.cpf_cnpj = formatCpfCnpj(user.cpf_cnpj)
+            user.cep = formatCep(user.cep)
 
-        return res.render('user/index', { user })
+            return res.render('user/index', { user })
+        } catch (error) {
+            console.error(error);
+        }
     },
     // Fase 4: Cadastrando Usuários > Máscaras e Validações > Query dinâmica para buscar usuários
     async post(req, res) {
-        const userId = await User.create(req.body)
+        try {
+            let { name, email, password, cpf_cnpj, cep, addres } = req.body
 
-        req.session.userId = userId
+            password = await hash(password, 8)
+            cpf_cnpj = cpf_cnpj.replace(/\D/g, "")
+            cep = cep.replace(/\D/g, "")
 
-        return res.redirect('/users')
+            const userId = await User.create({
+                name,
+                email,
+                password,
+                cpf_cnpj,
+                cep,
+                addres
+            })
+
+            req.session.userId = userId // Cria/coloca o usuário na sessão
+
+            return res.redirect('/users')
+        } catch (error) {
+            console.error(error);
+        }
     },
     // Fase 4: Controle de sessão do usuário > Atualizando usuários > Controller de atualização do usuário
     async update(req, res) {
@@ -57,8 +84,30 @@ module.exports = {
     // Fase 4: Controle de sessão do usuário > Lógica avançada de exclusão > SQL cascade
     async delete(req, res) {
         try {
+            const products = await Product.findAll({ where: { user_id: req.body.id } })
+
+            // Pegar todas as imagens do produto
+            const allFilesPromise = products.map(product =>
+                Product.files(product.id))
+
+            let promiseResults = await Promise.all(allFilesPromise)
+
+            // Remove o usuário
             await User.delete(req.body.id)
-            req.session.destroy() // Destroi a seção do usuário
+
+            // Destroy a sessão do usuário
+            req.session.destroy()
+
+            // Remove as imagens dos produtos que estão na pasta "public/images"
+            promiseResults.map(files => {
+                files.map(file => {
+                    try {
+                        unlinkSync(file.path)
+                    } catch (err) {
+                        console.error('Não localizado nenhuma imagem do produto para ser excluída. ' + err)
+                    }
+                })
+            })
 
             return res.render("session/login", {
                 success: "Conta deletada com sucesso."

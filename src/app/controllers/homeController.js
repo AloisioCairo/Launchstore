@@ -1,23 +1,19 @@
 // Aula: Fase 4: Home page > Iniciando o HomeController
-const { formatPrice } = require('../../lib/utils')
 const Product = require('../models/Product')
+
+const { formatPrice } = require('../../lib/utils')
 
 module.exports = {
     async index(req, res) {
-        let results = await Product.all()
-        const products = results.rows
+        const products = await Product.findAll()
 
         if (!products)
             return res.send("Produtos não encontrato")
 
         // Retorna a imagem do produto
         async function getImage(productId) {
-            let results = await Product.files(productId)
-            const files = results.rows.map(file => `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`)
-
-            console.log('req.protocol_' + req.protocol)
-            console.log('req.headers.host_' + req.headers.host)
-            console.log('files_' + files[0])
+            let files = await Product.files(productId)
+            files = files.map(file => `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`)
 
             return files[0]
         }

@@ -1,13 +1,16 @@
+const db = require('../../config/db')
+
 const Base = require('./Base')
 
 Base.init({ table: 'products' })
 
 module.exports = {
     ...Base,
-    files(id) {
-        return db.query(`SELECT * FROM files WHERE product_id = $1`, [id])
+    async files(id) {
+        const results = await db.query(`SELECT * FROM files WHERE product_id = $1`, [id])
+        return results.rows
     },
-    search(params) {
+    async search(params) {
         // Aula: Fase 4: Listando Produtos da Launchstore > Página de busca > SQL da página de busca
         const { filter, category } = params
 
@@ -33,28 +36,7 @@ module.exports = {
             ${filterQuery}
         `
 
-        return db.query(query)
+        const results = await db.query(query)
+        return results.rows
     }
-
-    // create(data, callback) {
-    //     const query = `INSERT INTO products (category_id, user_id, name, description, old_price, price, quantity, status)
-    //         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    //         RETURNING id`
-
-    //     // Remove a mascara de valor R$
-    //     data.price = data.price.replace(/\D/g, "")
-
-    //     const values = [
-    //         data.category_id,
-    //         data.userid,
-    //         data.name,
-    //         data.description,
-    //         data.old_price || data.price,
-    //         data.price,
-    //         data.quantity,
-    //         data.status || 1
-    //     ]
-
-    //     return db.query(query, values)
-    // },
 }
