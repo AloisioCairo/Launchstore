@@ -1,3 +1,4 @@
+const { Query } = require('pg')
 const db = require('../../config/db')
 
 const Base = require('./Base')
@@ -10,31 +11,26 @@ module.exports = {
         const results = await db.query(`SELECT * FROM files WHERE product_id = $1`, [id])
         return results.rows
     },
-    async search(params) {
-        // Aula: Fase 4: Listando Produtos da Launchstore > Página de busca > SQL da página de busca
-        const { filter, category } = params
-
-        let query = "",
-            filterQuery = `WHERE`
-
-        if (category) {
-            filterQuery = `${filterQuery}
-            products.category_id = ${category}
-            AND`
-        }
-
-        filterQuery = `
-            ${filterQuery}
-            products.name ILIKE '%${filter}%'
-            OR products.description ILIKE '%${filter}%'
-        `
-
-        query = `
+    async search({ filter, category }) {
+        let query = `
             SELECT products.*, categories.name AS category_name
             FROM products
             LEFT JOIN categories ON (categories.id = products.category_id)
-            ${filterQuery}
+            WHERE 1 = 1
         `
+
+        if (category) {
+            query += ` AND products.category_id = ${category} `
+        }
+
+        if (filter) {
+            query += ` AND (products.name ILIKE '%${filter}%'
+            OR products.description ILIKE '%${filter}%')`
+        }
+
+        query += ' AND status != 0'
+
+        console.log(query)
 
         const results = await db.query(query)
         return results.rows
