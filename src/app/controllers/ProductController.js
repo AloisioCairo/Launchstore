@@ -16,13 +16,7 @@ module.exports = {
     },
     async post(req, res) {
         try {
-            const keys = Object.keys(req.body)
 
-            for (key of keys) {
-                if (req.body[key] == "") {
-                    return res.send('Por favor. Preencha todos os campos.')
-                }
-            }
 
             let { category_id, name, description, old_price, price, quantity, status } = req.body
 
@@ -38,9 +32,6 @@ module.exports = {
                 quantity,
                 status: status || 1
             })
-
-            if (req.files.length == 0)
-                return res.send('Por favor, informe ao menos uma imagem.')
 
             // Aula: Upload de imagens > Salvando, atualizando e excluindo imagens > Array de promessas com Promisse.all()
             const filesPromise = req.files.map(file =>
@@ -84,14 +75,6 @@ module.exports = {
     },
     async put(req, res) {
         try {
-            const keys = Object.keys(req.body)
-
-            for (key of keys) {
-                if (req.body[key] == "" && key != "removed_files") {
-                    return res.send('Por favor. Preencha todos os campos.')
-                }
-            }
-
             // Aula: Fase 4: Upload de imagens > Salvando, atualizando e excluindo imagens > Atualizando imagens no banco
             if (req.files.length != 0) {
                 const newFilesPromisse = req.files.map(file =>

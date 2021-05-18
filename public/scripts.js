@@ -291,5 +291,24 @@ const Validate = {
             error,
             value
         }
+    },
+    // Fase 5: NodeJS Avançado > Validação Back e Front end dos Produtos
+    allFields(e) {
+        const items = document.querySelectorAll(' .item input, .item select, .item textarea')
+
+        for (item of items) {
+            if (item.value == "") {
+                const message = document.createElement('div')
+                message.classList.add('messages')
+                message.classList.add('error')
+                message.style.position = 'fixed'
+
+                message.innerHTML = 'Todos os campos são obrigatórios.'
+                document.querySelector('body').append(message)
+
+                e.preventDefault()
+            }
+
+        }
     }
 }
