@@ -1,49 +1,25 @@
 // Aula: Fase 4: Listando Produtos da Launchstore > Página de busca > SQL da página de busca
 const Product = require('../models/Product')
 
-const { formatPrice } = require('../../lib/utils')
+const LoadProductService = require('../services/LoadProductService')
 
 module.exports = {
     async index(req, res) {
         try {
-            let results,
-                params = {}
+            let { filter, category } = req.query
 
-            const { filter, category } = req.query
+            if (!filter || filter.toLowerCase() == 'toda a loja')
+                filter = null
 
-            if (!filter)
-                return res.redirect("/")
+            let products = await Product.search({ filter, category })
 
-            params.filter = filter
-
-            if (category) {
-                params.category = category
-            }
-
-            let products = await Product.search(params)
-
-            // Aula: Fase 4: Listando Produtos da Launchstore > Página de busca > SQL da página de busca. Minuto: 13:10 min
-            // Retorna a imagem do produto
-            async function getImage(productId) {
-                let files = await Product.files(productId)
-                files = files.map(file => `${req.protocol}://${req.headers.host}${file.path.replace("public", "")}`)
-
-                return files[0]
-            }
-
-            // Essa const retorna um array
-            const productsPromise = products.rows.map(async product => {
-                product.img = await getImage(product.id)
-                product.oldPrice = formatPrice(product.old_price)
-                product.price = formatPrice(product.price)
-
-                return product
-            })
+            // Fase 5: NodeJS Avançado > Utilizando o Serviço de Carregamento de Produtos
+            const productsPromise = products.map(LoadProductService.format)
 
             products = await Promise.all(productsPromise)
 
             const search = {
-                term: req.query.filter,
+                term: filter || 'Toda a loja',
                 total: products.length // Retorna a quantidade total de produtos
             }
 
