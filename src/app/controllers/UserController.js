@@ -4,6 +4,7 @@ const { hash } = require('bcryptjs')
 
 const User = require('../models/User')
 const Product = require('../models/Product')
+const LoadProductService = require('../services/LoadProductService')
 
 const { formatCpfCnpj, formatCep } = require('../../lib/utils')
 const { Console } = require('console')
@@ -119,6 +120,14 @@ module.exports = {
                 error: "Erro ao tentar deletar sua conta de usuário."
             })
         }
+    },
+    // Fase 5: NodeJS Avançado > Estrutura da Listagem de Anúncios do Usuário
+    async ads(req, res) {
+        const products = await LoadProductService.load('products', {
+            where: { user_id: req.session.userId }
+        })
+
+        return res.render("user/ads", { products })
     }
 
 }

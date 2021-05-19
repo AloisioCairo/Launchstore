@@ -568,18 +568,6 @@ form .item #photos-preview img {
   font-weight: bold;
 }
 
-/* user register */
-.user-register.container.form {
-  max-width: 500px;
-}
-
-/* .form input[name="password"],
-.form input[name="passwordRepeat"],
-.form input[name="cpf_cnpj"],
-.form input[name="cep"]{
-  max-width: 50%;
-} */
-
 /* Validate errors */
 .input .error {
   background-color: #e74c3c;

@@ -27,5 +27,6 @@ async function put(req, res, next) {
 }
 
 module.exports = {
-    post
+    post,
+    put
 }
