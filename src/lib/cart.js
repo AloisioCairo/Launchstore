@@ -48,7 +48,7 @@ const Cart = {
         // Atualiza o cart
         this.total.quantity++
         this.total.price += inCart.product.price
-        this.total.formatPrice = formatPrice(this.total.price)
+        this.total.formattedPrice = formatPrice(this.total.price)
 
         return this
     },
@@ -62,7 +62,7 @@ const Cart = {
         // Atualizar o item
         inCart.quantity--
         inCart.price = inCart.product.price * inCart.quantity
-        inCart.formattedPrice = FormatPrice(inCart.price)
+        inCart.formattedPrice = formatPrice(inCart.price)
 
         // Atualizar o carrinho
         this.total.quantity--
