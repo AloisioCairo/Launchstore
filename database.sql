@@ -102,3 +102,27 @@ add constraint files_product_id_fkey
 foreign key ("product_id")
 references  "products" ("id")
 on delete cascade
+
+
+-- Create "orders" - Tabela de pedido
+CREATE TABLE "orders" (
+	"id" serial PRIMARY KEY,
+	"seller_id" int NOT NULL,
+	"buyer_id" int NOT NULL,
+	"product_id" int NOT NULL,
+	"price" int NOT NULL,
+	"quantity" int DEFAULT 0,
+	"total" int NOT NULL,
+	"status" text NOT NULL,
+	"created_at" timestamp DEFAULT(now()),
+	"updated_at" timestamp DEFAULT(now())
+)
+
+ALTER TABLE "orders" ADD FOREIGN KEY ("seller_id") REFERENCES "users" ("id");
+ALTER TABLE "orders" ADD FOREIGN KEY ("buyer_id") REFERENCES "users" ("id");
+ALTER TABLE "orders" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON orders
+FOR EACH ROW 
+EXECUTE PROCEDURE trigger_set_timestamp();
