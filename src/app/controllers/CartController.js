@@ -65,5 +65,17 @@ module.exports = {
         } catch (error) {
             console.error('Houve um erro ao remover item do carrinho. Erro: ' + error)
         }
+    },
+    // Fase 5: Funcionalidades Extras para a Launchsore > Carrinho vazio
+    delete(req, res) {
+        let { id } = req.params
+        let { cart } = req.session
+
+        if (!cart)
+            return
+
+        req.session.cart = Cart.init(cart).delete(id)
+
+        return res.redirect('/cart')
     }
 }
