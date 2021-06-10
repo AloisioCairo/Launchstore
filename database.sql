@@ -10,6 +10,7 @@ CREATE TABLE "products" (
   "status" int DEFAULT 1,
   "created_at" timestamp DEFAULT (now()),
   "updated_at" timestamp DEFAULT (now())
+  "deleted_at" timestamp
 );
 
 CREATE TABLE "categories" (
@@ -126,3 +127,10 @@ CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON orders
 FOR EACH ROW 
 EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- Regra para atualizar o campo "deleted_at" no cadastro do produto quando ele for deletado
+CREATE OR REPLACE RULE delete_product AS
+ON DELETE TO products do INSTEAD
+UPDATE products SET deleted_at = NOW()
+WHERE products.id = old.id;
+

@@ -41,6 +41,11 @@ const Base = {
 
         return results.rows
     },
+    // Fase 5: Funcionalidades extra para a Launchstore > Soft Delete na aplicação
+    async findOneWithDeleted(filters) {
+        const results = await find(filters, `${this.table}_with_deleted`)
+        return results.rows[0]
+    },
     async create(fields) { // user.create({ name: 'Aloisio' })
         try {
             let keys = [],

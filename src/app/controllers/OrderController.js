@@ -1,11 +1,11 @@
 // Fase 5: NodeJS Avançado > Pedido de compra
 const LoadProductService = require('../services/LoadProductService')
+const LoadOrderService = require('../services/LoadOrderService')
 const User = require('../models/User')
 const Order = require('../models/Order')
 
 const mailer = require('../../lib/mailer')
 const Cart = require('../../lib/cart')
-const { formatPrice, date } = require('../../lib/utils')
 
 const email = (seller, product, buyer) => `
 <h2>Olá ${seller.name}</h2>
@@ -26,48 +26,31 @@ const email = (seller, product, buyer) => `
 
 module.exports = {
     async index(req, res) {
-        // Pegar os pedidos do usuário
-        let orders = await Order.findAll({ where: { buyer_id: req.session.userId } })
-
-        const getOrdersPromise = orders.map(async order => {
-            // Detalhes do produto
-            order.product = await LoadProductService.load('product', {
-                where: { id: order.product_id }
-            })
-
-            // Detalhes do comprador
-            order.buyer = await User.findOne({
-                where: { id: order.buyer_id }
-            })
-
-            // Detalhes do vendedor
-            order.seller = await User.findOne({
-                where: { id: order.seller_id }
-            })
-
-            // Formatação do preço
-            order.formattedPrice = formatPrice(order.price)
-            order.formattedTotal = formatPrice(order.total)
-
-            // Formatação do status
-            const statuses = {
-                open: 'Aberto',
-                sold: 'Vendido',
-                canceled: 'Cancelado'
+        const orders = await LoadOrderService.load('orders', {
+            where: {
+                buyer_id: req.session.userId
             }
-
-            order.formattedStatus = statuses[order.status]
-
-            // Formatação de atualizado em ...
-            const updatedAt = date(order.updated_at)
-            order.formattedUpdatedAt = `${order.formattedStatus} em ${updatedAt.day}/${updatedAt.month}/${updatedAt.year} às ${updatedAt.hour}h${updatedAt.minutes}`
-
-            return order
         })
 
-        orders = await Promise.all(getOrdersPromise)
-
         return res.render("orders/index", { orders })
+    },
+    async sales(req, res) {
+        const sales = await LoadOrderService.load('orders', {
+            where: {
+                seller_id: req.session.userId
+
+            }
+        })
+
+        return res.render("orders/sales", { sales })
+    },
+    // Fase 5: Funcionalidades extra para a Launchstore > Minhas vendas e detalhes do pedido
+    async show(req, res) {
+        const order = await LoadOrderService.load('order', {
+            where: { id: req.params.id }
+        })
+
+        return res.render("orders/details.njk", { order })
     },
     async post(req, res) {
         try {
@@ -131,6 +114,47 @@ module.exports = {
         } catch (error) {
             console.error('Erro ao tentar realizar uma compra. Erro: ' + error)
             return res.render('orders/error')
+        }
+    },
+    // Fase 5: Funcionalidades extra para a Launchstore > Mudar status do pedido
+    async update(req, res) {
+        try {
+            const { id, action } = req.params
+
+            const acceptedActions = ['close', 'cancel']
+
+            if (!acceptedActions.includes(action))
+                return res.send('Ação não localizada')
+
+            // Pegar o pedido
+            const order = await Order.findOne({
+                where: { id }
+            })
+
+            if (!order)
+                return res.send('Pedido não encontrado')
+
+
+            // Verificar se o pedido está aberto
+            if (order.status != 'open')
+                return res.send('Ação não localizada')
+
+
+            // Atualizar o pedido
+            const statuses = {
+                close: "sold",
+                cancel: "canceled"
+            }
+
+            order.status = statuses[action]
+
+            await Order.update(id, {
+                status: order.status
+            })
+
+            return res.redirect('/orders/sales')
+        } catch (error) {
+            console.error('Ocorreu um erro ao tentar atualizar o status do pedido. Erro: ' + error)
         }
     }
 }
